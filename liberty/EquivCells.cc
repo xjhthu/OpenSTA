@@ -333,7 +333,7 @@ equivCells(const LibertyCell *cell1,
     && equivCellPgPorts(cell1, cell2)
     && equivCellSequentials(cell1, cell2)
     && equivCellStatetables(cell1, cell2);
-    //&& equivCellTimingArcSets(cell1, cell2);
+    // && equivCellTimingArcSets(cell1, cell2);
 }
 
 bool
