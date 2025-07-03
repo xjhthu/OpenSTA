@@ -85,6 +85,9 @@ public:
 	     PowerResult &pad);
   PowerResult power(const Instance *inst,
                     const Corner *corner);
+  PowerResult estimatePower(const Instance *inst,
+                    LibertyCell* cell,
+                    const Corner *corner);
   void setGlobalActivity(float activity,
 			 float duty);
   void setInputActivity(float activity,

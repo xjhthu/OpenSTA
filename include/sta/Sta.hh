@@ -1244,6 +1244,9 @@ public:
 	     PowerResult &pad);
   PowerResult power(const Instance *inst,
                     const Corner *corner);
+  float estimatePower(const Instance *inst,
+                    LibertyCell* cell,
+                    const Corner *corner);
   PwrActivity activity(const Pin *pin);
 
   void writeTimingModel(const char *lib_name,

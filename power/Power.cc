@@ -301,6 +301,64 @@ Power::power(const Instance *inst,
   }
   return PowerResult();
 }
+PowerResult 
+Power::estimatePower(const Instance *inst,
+                    LibertyCell* cell,
+                    const Corner *corner)
+{
+  if (network_->isHierarchical(inst)) {
+    PowerResult result;
+    powerInside(inst, corner, result);
+    return result;
+  }
+  if (cell) {
+    ensureActivities();
+    
+    PowerResult result;
+    float cond_leakage = 0.0;
+    bool found_cond = false;
+    float uncond_leakage = 0.0;
+    bool found_uncond = false;
+    float cond_duty_sum = 0.0;
+    for (LeakagePower *leak : *cell->leakagePowers()) {
+      FuncExpr *when = leak->when();
+      if (when) {
+        PwrActivity cond_activity = evalActivity(when, inst);
+        float cond_duty = cond_activity.duty();
+        cond_leakage += leak->power() * cond_duty;
+        if (leak->power() > 0.0)
+          cond_duty_sum += cond_duty;
+        found_cond = true;
+      }
+      else {
+        uncond_leakage += leak->power();
+        found_uncond = true;
+      }
+    }
+    float leakage = 0.0;
+    float cell_leakage;
+    bool cell_leakage_exists;
+    cell->leakagePower(cell_leakage, cell_leakage_exists);
+    if (cell_leakage_exists) {
+      float duty = 1.0 - cond_duty_sum;
+      debugPrint(debug_, "power", 2, "leakage cell %s %.3e * %.2f",
+                cell->name(),
+                cell_leakage,
+                duty);
+      cell_leakage *= duty;
+    }
+    // Ignore unconditional leakage unless there are no conditional leakage groups.
+    if (found_cond)
+      leakage = cond_leakage;
+    else if (found_uncond)
+      leakage = uncond_leakage;
+    if (cell_leakage_exists)
+      leakage += cell_leakage;
+    result.incrLeakage(leakage);
+    return result;
+  }
+  return PowerResult();
+}
 
 void
 Power::powerInside(const Instance *hinst,

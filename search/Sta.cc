@@ -5713,6 +5713,14 @@ Sta::power(const Instance *inst,
   powerPreamble();
   return power_->power(inst, corner);
 }
+float Sta::estimatePower(const Instance *inst,
+                    LibertyCell* cell,
+                    const Corner *corner)
+{
+  powerPreamble();
+  PowerResult result=power_->estimatePower(inst, cell, corner);
+  return result.leakage();
+}
 
 PwrActivity
 Sta::activity(const Pin *pin)
